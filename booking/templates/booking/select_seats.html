@@ -1,0 +1,178 @@
+{% extends 'booking/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+    <form method="post" action="{% url 'payment' movie.id %}">
+        {% csrf_token %}
+
+        <div class="row">
+            <!-- Left Panel -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="mb-3">🎟️ Seat Categories</h4>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="badge bg-danger">VIP</span> ₹300
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">Premium</span> ₹200
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning text-dark">Gold</span> ₹100
+                            </li>
+                        </ul>
+                        <hr />
+                        <p class="text-muted mt-3">✅ Click to select seats.<br>❌ Grey seats are already booked.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="col-md-8">
+                <!-- VIP Seats -->
+                <h5 class="mb-3 text-danger">🎫 VIP Seats</h5>
+                <div class="d-flex flex-wrap justify-content-center mb-4 gap-2">
+                    {% for seat in seats %}
+                        {% if seat.seat_type == 'VIP' %}
+                            <label class="seat-label">
+                                <input type="checkbox" name="selected_seats" value="{{ seat.id }}"
+                                    {% if seat.is_booked %}disabled{% endif %}
+                                    data-type="VIP">
+                                <div class="seat vip {% if seat.is_booked %}booked{% endif %}">
+                                    {{ seat.seat_number }}
+                                </div>
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Premium Seats -->
+                <h5 class="mb-3 text-primary">✨ Premium Seats</h5>
+                <div class="d-flex flex-wrap justify-content-center mb-4 gap-2">
+                    {% for seat in seats %}
+                        {% if seat.seat_type == 'Premium' %}
+                            <label class="seat-label">
+                                <input type="checkbox" name="selected_seats" value="{{ seat.id }}"
+                                    {% if seat.is_booked %}disabled{% endif %}
+                                    data-type="Premium">
+                                <div class="seat premium {% if seat.is_booked %}booked{% endif %}">
+                                    {{ seat.seat_number }}
+                                </div>
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Gold Seats -->
+                <h5 class="mb-3 text-warning">🥇 Gold Seats</h5>
+                <div class="d-flex flex-wrap justify-content-center mb-4 gap-2">
+                    {% for seat in seats %}
+                        {% if seat.seat_type == 'Gold' %}
+                            <label class="seat-label">
+                                <input type="checkbox" name="selected_seats" value="{{ seat.id }}"
+                                    {% if seat.is_booked %}disabled{% endif %}
+                                    data-type="Gold">
+                                <div class="seat gold {% if seat.is_booked %}booked{% endif %}">
+                                    {{ seat.seat_number }}
+                                </div>
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Screen -->
+                <div class="mb-5 text-center">
+                    <div class="screen px-5 py-2 bg-light border rounded">🎥 SCREEN</div>
+                </div>
+
+                <!-- Total Price -->
+                <div class="text-center">
+                    <h5>Total Price: ₹<span id="totalPrice" class="text-success">0</span></h5>
+                    <button type="submit" class="btn btn-success btn-lg mt-3">Proceed to Payment 💳</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- STYLES -->
+<style>
+    .seat-label input[type="checkbox"] {
+        display: none;
+    }
+
+    .seat {
+        width: 45px;
+        height: 45px;
+        border-radius: 6px;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .vip {
+        background-color: #dc3545;
+    }
+
+    .premium {
+        background-color: #007bff;
+    }
+
+    .gold {
+        background-color: #ffc107;
+        color: #000;
+    }
+
+    .booked {
+        background-color: #6c757d !important;
+        color: white;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    input[type="checkbox"]:checked + .seat {
+        border: 3px solid #000;
+        transform: scale(1.05);
+    }
+
+    .screen {
+        font-size: 18px;
+        font-weight: 600;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+</style>
+
+<!-- JS -->
+<script>
+    const checkboxes = document.querySelectorAll('input[name="selected_seats"]');
+    const totalDisplay = document.getElementById('totalPrice');
+
+    function getPrice(type) {
+        if (type === 'VIP') return 300;
+        if (type === 'Premium') return 200;
+        if (type === 'Gold') return 100;
+        return 0;
+    }
+
+    function updatePrice() {
+        let total = 0;
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                total += getPrice(cb.dataset.type);
+            }
+        });
+        totalDisplay.textContent = total;
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener('change', updatePrice));
+    updatePrice();
+</script>
+{% endblock %}

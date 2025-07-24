@@ -1,0 +1,111 @@
+{% extends 'booking/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5 text-center animate__animated animate__fadeIn">
+    <h2 class="text-success mb-4">🎉 Payment Successful!</h2>
+    <p class="lead">Thank you for booking with <strong>VistaCinemas</strong>.</p>
+
+    <div class="ticket-card mx-auto shadow-lg p-4 rounded-4 mt-5 animate__animated animate__zoomIn" style="max-width: 520px;">
+        <!-- Movie Info -->
+        <div class="d-flex justify-content-start align-items-center gap-3 mb-3">
+            {% if booking.movie.image %}
+                <img src="{{ booking.movie.image.url }}" alt="{{ booking.movie.title }}" width="70" class="rounded shadow-sm">
+            {% else %}
+                <img src="{% static 'images/default_poster.jpg' %}" alt="Movie Poster" width="70" class="rounded shadow-sm">
+            {% endif %}
+            <div class="text-start">
+                <h4 class="text-primary fw-bold mb-0">{{ booking.movie.title }}</h4>
+                <small class="text-muted">{{ booking.movie.show_time|date:"D, M j Y - g:i A" }}</small>
+                <small class="text-muted d-block">📍 {{ booking.movie.location }}</small>
+                <small class="text-muted">🎥 Screen {{ booking.movie.screen_number }}</small>
+
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Booking Info -->
+        <p><strong>🎫 Seats:</strong>
+            <span class="text-dark">
+                {% for seat in booking.seats.all %}
+                    {{ seat.seat_number }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    None
+                {% endfor %}
+            </span>
+        </p>
+
+        <p><strong>💵 Amount Paid:</strong> ₹{{ booking.total_price }}</p>
+        <p><strong>🆔 Booking ID:</strong> #{{ booking.id }}</p>
+
+        <!-- ✅ QR Code Section -->
+        <div class="mt-4">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" width="140" height="140" class="shadow-sm border border-light rounded bg-white p-2 qr-animation">
+            <p class="text-muted small mt-2">Scan this code at the entrance</p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="mt-4 d-flex justify-content-center gap-3">
+            <a href="{% url 'movie_list' %}" class="btn btn-primary btn-lg px-4 shadow-sm">🏠 Back to Movies</a>
+            <a href="#" class="btn btn-outline-primary btn-lg px-4 shadow-sm" onclick="window.print()">📥 Download Ticket</a>
+        </div>
+    </div>
+</div>
+
+<!-- Ticket Style -->
+<style>
+.ticket-card {
+    background: linear-gradient(135deg, #fdfbfb, #ebedee);
+    border-left: 5px dashed #F5394F;
+    border-radius: 20px;
+    position: relative;
+    padding: 30px;
+    transition: all 0.3s ease-in-out;
+}
+
+.ticket-card:hover {
+    transform: scale(1.02);
+}
+
+.ticket-card::before,
+.ticket-card::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+.ticket-card::before {
+    left: -12px;
+}
+
+.ticket-card::after {
+    right: -12px;
+}
+
+.qr-animation {
+    animation: bounceIn 1s ease-in-out;
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+</style>
+{% endblock %}

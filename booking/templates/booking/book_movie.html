@@ -1,0 +1,62 @@
+{% extends 'booking/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+    <h3 class="mb-4 text-center text-primary">🎬 {{ movie.title }}</h3>
+
+    <div class="text-center mb-4">
+        <div style="background: #ccc; color: black; padding: 10px; width: 60%; margin: auto; border-radius: 10px; font-weight: bold;">
+            SCREEN
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'create_order' movie.id %}">
+        {% csrf_token %}
+        <div class="d-flex flex-column align-items-center">
+            <div class="seat-grid" style="display: grid; grid-template-columns: repeat(10, 40px); gap: 10px;">
+                {% for seat in seats %}
+                    <label>
+                        <input type="checkbox" name="seats" value="{{ seat.id }}" {% if seat.is_booked %}disabled{% endif %} hidden>
+                        <div class="seat {% if seat.is_booked %}booked{% endif %}">
+                            {{ seat.seat_number }}
+                        </div>
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success px-4">Proceed to Payment</button>
+        </div>
+    </form>
+</div>
+
+<style>
+.seat {
+    width: 40px;
+    height: 40px;
+    background-color: #28a745;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+input[type="checkbox"]:checked + .seat {
+    background-color: #ffc107;
+    color: black;
+    font-weight: bold;
+}
+.booked {
+    background-color: #6c757d !important;
+    pointer-events: none;
+}
+.seat:hover {
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}

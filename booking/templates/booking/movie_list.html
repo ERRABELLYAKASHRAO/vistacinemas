@@ -1,0 +1,143 @@
+{% extends 'booking/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-banner d-flex align-items-center justify-content-center text-white text-center">
+    <div class="container">
+        <h1 class="display-2 fw-bold mb-3 animate__animated animate__fadeInDown">Welcome to <span style="color:#FF4C4C;">VistaCinemas</span></h1>
+        <p class="lead animate__animated animate__fadeInUp animate__delay-1s">Your Ultimate Destination to Book Cinematic Experiences</p>
+        <a href="#now-showing" class="btn btn-lg btn-glass mt-4 animate__animated animate__fadeInUp animate__delay-2s">🎟 Book Tickets</a>
+    </div>
+</section>
+
+<!-- Movie Section -->
+<section id="now-showing" class="container my-5">
+    <h2 class="text-center mb-5 text-light display-5 fw-bold animate__animated animate__fadeInUp">🎬 Now Showing</h2>
+    <div class="row g-4">
+        {% for movie in movies %}
+        <div class="col-sm-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1 }}00">
+            <div class="movie-card h-100">
+                <div class="movie-image-wrapper">
+                    {% if movie.image %}
+                        <img src="{{ movie.image.url }}" class="movie-image" alt="{{ movie.title }}">
+                    {% else %}
+                        <img src="{% static 'images/default.jpg' %}" class="movie-image" alt="{{ movie.title }}">
+                    {% endif %}
+                </div>
+                <div class="p-3 text-center">
+    <h5 class="text-light">{{ movie.title }}</h5>
+    <p class="text-light" style="font-size: 0.95rem; min-height: 60px;">
+        {{ movie.description|truncatewords:20 }}
+    </p>
+    <a href="{% url 'select_seats' movie.id %}" class="btn btn-outline-glass btn-sm mt-2 px-4">Book Now</a>
+</div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Scripts and Styles -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>AOS.init();</script>
+
+<style>
+    body {
+        background: linear-gradient(to right, #1e1e2f, #0d0d1a);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .hero-banner {
+        height: 90vh;
+        background: url('https://images.unsplash.com/photo-1598899134739-24c46f58d8e2?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-banner::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: -1;
+    }
+
+    .btn-glass {
+        background: rgba(255, 76, 76, 0.2);
+        border: 1px solid #FF4C4C;
+        color: #fff;
+        padding: 12px 30px;
+        border-radius: 30px;
+        backdrop-filter: blur(5px);
+        transition: 0.3s;
+    }
+
+    .btn-glass:hover {
+        background-color: #FF4C4C;
+        color: #fff;
+    }
+
+    .movie-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s;
+    }
+
+    .movie-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 0 30px rgba(255, 76, 76, 0.4);
+    }
+
+    .movie-image-wrapper {
+        height: 300px;
+        overflow: hidden;
+    }
+
+    .movie-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .movie-card:hover .movie-image {
+        transform: scale(1.05);
+    }
+
+    .btn-outline-glass {
+        border: 1px solid #FF4C4C;
+        color: #FF4C4C;
+        background: transparent;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: 0.3s;
+    }
+
+    .btn-outline-glass:hover {
+        background: #FF4C4C;
+        color: white;
+    }
+
+    h2 {
+        color: #fff;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    @media (max-width: 768px) {
+        .hero-banner h1 {
+            font-size: 2.5rem;
+        }
+        .hero-banner p {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+{% endblock %}

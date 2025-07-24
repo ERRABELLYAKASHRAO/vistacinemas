@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirm Payment | Tickethub</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1e1e2f, #2c3e50);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+    .card-glass {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 40px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    .seat-chip {
+      background: #0dcaf0;
+      color: black;
+      border-radius: 20px;
+      padding: 5px 12px;
+      margin: 3px;
+      display: inline-block;
+      font-weight: 600;
+    }
+    .btn-pay {
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 25px;
+      transition: 0.3s ease;
+      font-size: 18px;
+      width: 100%;
+    }
+    .btn-pay:hover {
+      background-color: #218838;
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body>
+  <div class="card-glass text-center">
+    <h2 class="mb-4">🎟️ Confirm Your Booking</h2>
+    <p><strong>Movie:</strong> {{ movie.title }}</p>
+    <p><strong>Seats:</strong></p>
+    <div class="mb-3">
+      {% for seat in seats %}
+        <span class="seat-chip">{{ seat.seat_number }}</span>
+      {% endfor %}
+    </div>
+    <p><strong>Total Price:</strong> ₹{{ total_price }}</p>
+    <button id="rzp-button" class="btn-pay mt-3">Pay ₹{{ total_price }} with Razorpay</button>
+  </div>
+
+  <script>
+    const options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ total_price|floatformat:2|floatformat:0 }}00",
+        "currency": "INR",
+        "name": "Tickethub",
+        "description": "Movie Ticket Booking",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response){
+            const order_id = "{{ razorpay_order_id }}";
+            const payment_id = response.razorpay_payment_id;
+            window.location.href = `/payment-success/?order_id=${order_id}&payment_id=${payment_id}`;
+        },
+        "theme": {
+            "color": "#28a745"
+        }
+    };
+
+    const rzp = new Razorpay(options);
+    document.getElementById('rzp-button').onclick = function(e){
+        rzp.open();
+        e.preventDefault();
+    }
+  </script>
+</body>
+</html>
