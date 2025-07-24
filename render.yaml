@@ -3,11 +3,11 @@ services:
     name: tickethub
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn projectname.wsgi:application
+    startCommand: gunicorn tickethub.wsgi:application
     envVars:
       - key: DJANGO_SETTINGS_MODULE
-        value: projectname.settings
+        value: tickethub.settings
       - key: SECRET_KEY
-        value: your-secret-key
+        value: g*-k1-3utv7r6bi9+_s9+t)6x+8drj4-tf17t$zkxqcnd_p=1n
       - key: DEBUG
-        value: True
+        value: False
