@@ -19,33 +19,53 @@ razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZOR
 def movie_list(request):
     movies = Movie.objects.all()
     return render(request, 'booking/movie_list.html', {'movies': movies})
-
+from datetime import datetime, timedelta, date
 def select_showtime(request, movie_id):
     movie = get_object_or_404(Movie, id=movie_id)
-    today = now().date()
-    dates = [today + timedelta(days=i) for i in range(7)]
+
+    start_date = movie.show_time.date()
+    dates = [start_date + timedelta(days=i) for i in range(7)]
+
+    # ✅ Auto-create showtimes for next 7 days if not already created
+    show_times_per_day = [
+        datetime.strptime(t, "%I:%M %p").time()
+        for t in ["6:00 AM", "9:00 AM", "12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"]
+    ]
+
+    for single_date in dates:
+        for time_obj in show_times_per_day:
+            Showtime.objects.get_or_create(
+                movie=movie,
+                screen_number=movie.screen_number,
+                date=single_date,
+                time=time_obj
+            )
 
     selected_date_str = request.GET.get("date")
-    try:
-        selected_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date() if selected_date_str else today
-    except ValueError:
-        selected_date = today
+    if selected_date_str:
+        try:
+            selected_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            selected_date = start_date
+    else:
+        selected_date = start_date
 
-    showtimes = Showtime.objects.filter(movie=movie, date=selected_date).order_by('screen_number', 'time')
+    showtimes = Showtime.objects.filter(
+        movie=movie,
+        screen_number=movie.screen_number,
+        date=selected_date
+    ).order_by('time')
 
-    showtimes_by_screen = defaultdict(list)
-    seen = defaultdict(set)
-    for show in showtimes:
-        if show.time not in seen[show.screen_number]:
-            showtimes_by_screen[show.screen_number].append(show)
-            seen[show.screen_number].add(show.time)
+    showtimes_by_screen = {movie.screen_number: list(showtimes)}
 
-    return render(request, 'booking/select_showtime.html', {
-        'movie': movie,
-        'dates': dates,
-        'selected_date': selected_date,
-        'showtimes_by_screen': dict(showtimes_by_screen),
+    return render(request, "booking/select_showtime.html", {
+        "movie": movie,
+        "showtimes_by_screen": showtimes_by_screen,
+        "dates": dates,
+        "selected_date": selected_date,
     })
+
+
 @csrf_exempt
 def select_seats(request, movie_id, showtime_id):
     movie = get_object_or_404(Movie, id=movie_id)

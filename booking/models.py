@@ -18,7 +18,7 @@ class Showtime(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     date = models.DateField()
     time = models.TimeField()
-    screen_number = models.IntegerField()
+    screen_number = models.IntegerField(choices=[(1, 'Screen 1'), (2, 'Screen 2'), (3, 'Screen 3')])
 
     def __str__(self):
         return f"{self.movie.title} - {self.date} {self.time}"
@@ -35,9 +35,12 @@ class Seat(models.Model):
     seat_type = models.CharField(max_length=10, choices=SEAT_TYPES)
     screen_number = models.IntegerField(null=True, blank=True)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, null=True, blank=True)
+    is_booked = models.BooleanField(default=False)
+    showtime = models.ForeignKey('ShowTime', on_delete=models.CASCADE, null=True) 
 
+    
     def __str__(self):
-        return f"{self.seat_number} ({self.seat_type})"
+        return f"{self.seat_number} - {'Booked' if self.is_booked else 'Available'}"
 
 
 class Booking(models.Model):
