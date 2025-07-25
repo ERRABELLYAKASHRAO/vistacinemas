@@ -3,11 +3,10 @@
 
 {% block content %}
 <div class="container my-5">
-    <form method="post" action="{% url 'payment' movie.id %}">
+    <form method="post" action="">
         {% csrf_token %}
-
         <div class="row">
-            <!-- Left Panel -->
+            <!-- Sidebar Info -->
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-body">
@@ -24,70 +23,39 @@
                             </li>
                         </ul>
                         <hr />
-                        <p class="text-muted mt-3">✅ Click to select seats.<br>❌ Grey seats are already booked.</p>
+                        <p class="text-muted mt-3">✅ Select your seats below.<br>❌ Grey ones are already booked.</p>
+                        {% if error %}
+                            <div class="alert alert-danger mt-3">{{ error }}</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
 
-            <!-- Right Panel -->
+            <!-- Seat Layout -->
             <div class="col-md-8">
-                <!-- VIP Seats -->
-                <h5 class="mb-3 text-danger">🎫 VIP Seats</h5>
-                <div class="d-flex flex-wrap justify-content-center mb-4 gap-2">
-                    {% for seat in seats %}
-                        {% if seat.seat_type == 'VIP' %}
-                            <label class="seat-label">
-                                <input type="checkbox" name="selected_seats" value="{{ seat.id }}"
-                                    {% if seat.is_booked %}disabled{% endif %}
-                                    data-type="VIP">
-                                <div class="seat vip {% if seat.is_booked %}booked{% endif %}">
-                                    {{ seat.seat_number }}
-                                </div>
-                            </label>
-                        {% endif %}
-                    {% endfor %}
-                </div>
+                {% for category in seat_categories %}
+                    <h5 class="mb-3 text-{{ category|lower }}">{{ category }} Seats</h5>
+                    <div class="d-flex flex-wrap justify-content-center mb-4 gap-2">
+                        {% for seat in seats %}
+                            {% if seat.seat_type == category %}
+                                <label class="seat-label">
+                                    <input type="checkbox" name="selected_seats" value="{{ seat.id }}"
+                                        {% if seat.id in booked_seat_ids %}disabled{% endif %}
+                                        data-type="{{ seat.seat_type }}">
+                                    <div class="seat {{ category|lower }} {% if seat.id in booked_seat_ids %}booked{% endif %}">
+                                        {{ seat.seat_number }}
+                                    </div>
+                                </label>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
 
-                <!-- Premium Seats -->
-                <h5 class="mb-3 text-primary">✨ Premium Seats</h5>
-                <div class="d-flex flex-wrap justify-content-center mb-4 gap-2">
-                    {% for seat in seats %}
-                        {% if seat.seat_type == 'Premium' %}
-                            <label class="seat-label">
-                                <input type="checkbox" name="selected_seats" value="{{ seat.id }}"
-                                    {% if seat.is_booked %}disabled{% endif %}
-                                    data-type="Premium">
-                                <div class="seat premium {% if seat.is_booked %}booked{% endif %}">
-                                    {{ seat.seat_number }}
-                                </div>
-                            </label>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-
-                <!-- Gold Seats -->
-                <h5 class="mb-3 text-warning">🥇 Gold Seats</h5>
-                <div class="d-flex flex-wrap justify-content-center mb-4 gap-2">
-                    {% for seat in seats %}
-                        {% if seat.seat_type == 'Gold' %}
-                            <label class="seat-label">
-                                <input type="checkbox" name="selected_seats" value="{{ seat.id }}"
-                                    {% if seat.is_booked %}disabled{% endif %}
-                                    data-type="Gold">
-                                <div class="seat gold {% if seat.is_booked %}booked{% endif %}">
-                                    {{ seat.seat_number }}
-                                </div>
-                            </label>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-
-                <!-- Screen -->
                 <div class="mb-5 text-center">
                     <div class="screen px-5 py-2 bg-light border rounded">🎥 SCREEN</div>
                 </div>
 
-                <!-- Total Price -->
+                <!-- Total and Submit -->
                 <div class="text-center">
                     <h5>Total Price: ₹<span id="totalPrice" class="text-success">0</span></h5>
                     <button type="submit" class="btn btn-success btn-lg mt-3">Proceed to Payment 💳</button>
@@ -104,42 +72,57 @@
     }
 
     .seat {
-        width: 45px;
-        height: 45px;
-        border-radius: 6px;
-        font-weight: bold;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        font-weight: 700;
         display: flex;
         justify-content: center;
         align-items: center;
         color: white;
         cursor: pointer;
-        transition: 0.3s;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        user-select: none;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     .vip {
-        background-color: #dc3545;
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+        box-shadow: 0 6px 12px rgba(220, 53, 69, 0.5);
     }
 
     .premium {
-        background-color: #007bff;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        box-shadow: 0 6px 12px rgba(0, 123, 255, 0.5);
     }
 
     .gold {
-        background-color: #ffc107;
-        color: #000;
+        background: linear-gradient(135deg, #ffc107, #cc9a06);
+        color: #3a2e00;
+        box-shadow: 0 6px 12px rgba(255, 193, 7, 0.5);
     }
 
     .booked {
-        background-color: #6c757d !important;
-        color: white;
+        background: #6c757d !important;
+        color: #ddd !important;
+        cursor: not-allowed;
+        opacity: 0.75;
         pointer-events: none;
-        opacity: 0.6;
+        box-shadow: none;
     }
 
     input[type="checkbox"]:checked + .seat {
         border: 3px solid #000;
-        transform: scale(1.05);
+        box-shadow: 0 0 12px 3px rgba(0,0,0,0.6);
+        transform: scale(1.1);
+    }
+
+    .seat-label:not(.booked):hover .seat {
+        filter: brightness(1.15);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        transform: scale(1.1);
+        transition: all 0.2s ease-in-out;
     }
 
     .screen {
@@ -150,29 +133,30 @@
     }
 </style>
 
-<!-- JS -->
 <script>
-    const checkboxes = document.querySelectorAll('input[name="selected_seats"]');
-    const totalDisplay = document.getElementById('totalPrice');
+    document.addEventListener("DOMContentLoaded", function () {
+        const checkboxes = document.querySelectorAll('input[name="selected_seats"]');
+        const totalDisplay = document.getElementById('totalPrice');
 
-    function getPrice(type) {
-        if (type === 'VIP') return 300;
-        if (type === 'Premium') return 200;
-        if (type === 'Gold') return 100;
-        return 0;
-    }
+        function getPrice(type) {
+            if (type === 'VIP') return 300;
+            if (type === 'Premium') return 200;
+            if (type === 'Gold') return 100;
+            return 0;
+        }
 
-    function updatePrice() {
-        let total = 0;
-        checkboxes.forEach(cb => {
-            if (cb.checked) {
-                total += getPrice(cb.dataset.type);
-            }
-        });
-        totalDisplay.textContent = total;
-    }
+        function updatePrice() {
+            let total = 0;
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    total += getPrice(cb.dataset.type);
+                }
+            });
+            totalDisplay.textContent = total;
+        }
 
-    checkboxes.forEach(cb => cb.addEventListener('change', updatePrice));
-    updatePrice();
+        checkboxes.forEach(cb => cb.addEventListener('change', updatePrice));
+        updatePrice();
+    });
 </script>
 {% endblock %}

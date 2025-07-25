@@ -9,17 +9,16 @@
     <div class="ticket-card mx-auto shadow-lg p-4 rounded-4 mt-5 animate__animated animate__zoomIn" style="max-width: 520px;">
         <!-- Movie Info -->
         <div class="d-flex justify-content-start align-items-center gap-3 mb-3">
-            {% if booking.movie.image %}
-                <img src="{{ booking.movie.image.url }}" alt="{{ booking.movie.title }}" width="70" class="rounded shadow-sm">
+            {% if booking.showtime.movie.image %}
+                <img src="{{ booking.showtime.movie.image.url }}" alt="{{ booking.showtime.movie.title }}" width="70" class="rounded shadow-sm">
             {% else %}
                 <img src="{% static 'images/default_poster.jpg' %}" alt="Movie Poster" width="70" class="rounded shadow-sm">
             {% endif %}
             <div class="text-start">
-                <h4 class="text-primary fw-bold mb-0">{{ booking.movie.title }}</h4>
-                <small class="text-muted">{{ booking.movie.show_time|date:"D, M j Y - g:i A" }}</small>
-                <small class="text-muted d-block">📍 {{ booking.movie.location }}</small>
-                <small class="text-muted">🎥 Screen {{ booking.movie.screen_number }}</small>
-
+                <h4 class="text-primary fw-bold mb-0">{{ booking.showtime.movie.title }}</h4>
+                <small class="text-muted">{{ booking.showtime.date }} - {{ booking.showtime.time|time:"g:i A" }}</small>
+                <small class="text-muted d-block">📍 {{ booking.showtime.movie.location }}</small>
+                <small class="text-muted">🎥 Screen {{ booking.showtime.screen_number }}</small>
             </div>
         </div>
 

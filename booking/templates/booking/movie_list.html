@@ -30,7 +30,7 @@
     <p class="text-light" style="font-size: 0.95rem; min-height: 60px;">
         {{ movie.description|truncatewords:20 }}
     </p>
-    <a href="{% url 'select_seats' movie.id %}" class="btn btn-outline-glass btn-sm mt-2 px-4">Book Now</a>
+    <a href="{% url 'select_showtime' movie.id %}" class="btn btn-outline-glass btn-sm mt-2 px-4">Book Now</a>
 </div>
 
             </div>

@@ -1,0 +1,197 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Showtime - {{ movie.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            margin-top: 60px;
+            margin-bottom: 60px;
+        }
+
+        .movie-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .movie-header h2 {
+            font-weight: 700;
+            font-size: 32px;
+        }
+
+        .movie-header p {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+        .date-scroll {
+            display: flex;
+            overflow-x: auto;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            margin-bottom: 30px;
+            scroll-behavior: smooth;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .date-box {
+            min-width: 100px;
+            padding: 12px 15px;
+            margin-right: 12px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .date-box:hover {
+            background-color: #1f6feb;
+            transform: scale(1.05);
+        }
+
+        .date-box.active {
+            background-color: #1f6feb;
+            border-color: #fff;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(31, 111, 235, 0.7);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: 18px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .card h5 {
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: #f1f1f1;
+        }
+
+        .showtime-btn {
+            margin: 6px 8px;
+            border-radius: 50px;
+            padding: 10px 22px;
+            font-weight: 500;
+            font-size: 15px;
+            color: #fff;
+            border: 2px solid #1f6feb;
+            background: transparent;
+            transition: 0.3s ease;
+        }
+
+        .showtime-btn:hover {
+            background-color: #1f6feb;
+            box-shadow: 0 0 12px rgba(31, 111, 235, 0.6);
+        }
+
+        .alert {
+            background-color: #ff4e50;
+            border: none;
+            font-weight: bold;
+            color: white;
+        }
+
+        @media (max-width: 576px) {
+            .showtime-btn {
+                margin: 5px 4px;
+                padding: 8px 15px;
+                font-size: 13px;
+            }
+            .date-box {
+                min-width: 80px;
+                font-size: 14px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Movie Header -->
+    <div class="movie-header">
+        <h2><i class="fas fa-film me-2"></i>{{ movie.title }}</h2>
+        <p><i class="fas fa-calendar-day me-2"></i>Select a showtime to continue booking</p>
+    </div>
+
+    <!-- Date Scroll -->
+    <div class="date-scroll mb-4">
+        {% for date in dates %}
+            <a href="?date={{ date|date:'Y-m-d' }}" class="date-box {% if date == selected_date %}active{% endif %}">
+                {{ date|date:"M d" }}<br>{{ date|date:"D" }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <!-- Showtimes -->
+    {% if showtimes_by_screen %}
+        {% for screen, show_list in showtimes_by_screen.items %}
+            <div class="card mb-4">
+                <h5><i class="fas fa-tv me-2"></i>Screen {{ screen }} — {{ selected_date|date:"F d, Y" }}</h5>
+                <div>
+                    {% for show in show_list %}
+                        <a href="{% url 'select_seats' movie.id show.id %}" class="btn showtime-btn">
+                            {{ show.time|time:"g:i A" }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert text-center">
+            <i class="fas fa-exclamation-triangle me-2"></i>No showtimes available for this date.
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
